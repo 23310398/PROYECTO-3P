@@ -1,25 +1,25 @@
-# Nombre del ejecutable
-TARGET = pelea.exe
+# Makefile para compilar y ejecutar el juego
 
 # Compilador
 CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra
 
-# Opciones de compilación
-CXXFLAGS = -Wall -std=c++11 -mconsole
-
-# Archivos fuente
+# Archivos fuente y binario
 SRC = main.cpp
+BIN = juego
 
 # Regla principal
-all: $(TARGET)
+all: $(BIN)
 
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
+$(BIN): $(SRC)
+	$(CXX) $(CXXFLAGS) -o $(BIN) $(SRC)
 
-run: all
-	./$(TARGET)
+# Regla para ejecutar el programa
+run: $(BIN)
+	./$(BIN)
 
+# Regla para limpiar archivos generados
 clean:
-	del /Q *.exe 2>nul || true
+	rm -f $(BIN)
 
-.PHONY: all clean run
+.PHONY: all run clean
