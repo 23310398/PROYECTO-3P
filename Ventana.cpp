@@ -5,27 +5,32 @@ int main()
     // Crear una ventana de SFML
     sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
 
-    // Crear una forma circular de SFML
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    // Cargar una textura desde el archivo PORTADA.jpg
+    sf::Texture texture;
+    if (!texture.loadFromFile("PORTADA.jpg")) {
+        // Manejar error si no se encuentra la imagen
+        return -1;
+    }
 
-    while (window.isOpen())
-    {
+    // Crear un sprite y asignarle la textura
+    sf::Sprite sprite;
+    sprite.setTexture(texture);
+
+    // Centrar el sprite en la ventana
+    sprite.setPosition(
+        (window.getSize().x - sprite.getGlobalBounds().width) / 2,
+        (window.getSize().y - sprite.getGlobalBounds().height) / 2
+    );
+
+    while (window.isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event))
-        {
-            // Verificar si se ha cerrado la ventana
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
 
-        // Limpiar la ventana
         window.clear();
-
-        // Dibujar la forma en la ventana
-        window.draw(shape);
-
-        // Mostrar la ventana
+        window.draw(sprite); // Dibujar el sprite en lugar del círculo
         window.display();
     }
 
