@@ -1,12 +1,17 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include <vector>
+#include <cmath>
+
+// Declarar generarParticulas antes de la clase Peleador
+void generarParticulas(sf::Vector2f pos, sf::Color color);
 
 class Peleador {
 public:
     // Modificar la clase Peleador para aceptar texturas pre-cargadas
     Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor)
-        : vida(100), currentFrame(0), animationTime(0.1f), elapsedTime(0.0f) {
+        : vida(100), energia(0), currentFrame(0), animationTime(0.1f), elapsedTime(0.0f) {
         texture = &sharedTexture; // Usar la textura compartida
         sprite.setTexture(*texture);
         sprite.setPosition(startPos);
@@ -52,10 +57,50 @@ public:
     void recibirDanio(int cantidad) {
         vida -= cantidad;
         if (vida < 0) vida = 0;
+
+        // Cambiar temporalmente el color del sprite
+        sprite.setColor(sf::Color::Red);
+        generarParticulas(sprite.getPosition(), sf::Color::Yellow);
+    }
+
+    void cargarEnergia() {
+        if (energia < 100) {
+            energia += 1; // Incrementar energía gradualmente
+        }
+    }
+
+    bool puedeUsarEspecial() const {
+        return energia >= 100;
+    }
+
+    // Modificar usarEspecial para personalizar los ataques especiales
+    void usarEspecial(Peleador& oponente, int jugador) {
+        if (puedeUsarEspecial()) {
+            if (jugador == 1) {
+                oponente.recibirDanio(30); // Jugador 1 inflige 30 de daño
+                oponente.move(-50, 0); // Empuja al oponente hacia atrás
+            } else if (jugador == 2) {
+                oponente.recibirDanio(20); // Jugador 2 inflige 20 de daño
+                vida += 10; // Recupera 10 puntos de vida
+                if (vida > 100) vida = 100; // Limitar la vida máxima a 100
+            }
+            energia = 0; // Reiniciar energía después de usar el especial
+        }
+    }
+
+    void update(float deltaTime) {
+        if (sprite.getColor() == sf::Color::Red) {
+            sprite.setColor(sf::Color::White);
+        }
+        animate(deltaTime);
     }
 
     int getVida() const {
         return vida;
+    }
+
+    int getEnergia() const {
+        return energia;
     }
 
 private:
@@ -63,6 +108,7 @@ private:
     sf::Sprite sprite;
     sf::RectangleShape hitbox;
     int vida;
+    int energia;
 
     // Variables para manejar el sprite sheet
     int frameWidth;
@@ -74,6 +120,49 @@ private:
     float elapsedTime;   // Tiempo transcurrido
 };
 
+// Clase para manejar partículas visuales
+class Particula {
+public:
+    Particula(sf::Vector2f pos, sf::Color color)
+        : position(pos), velocity(rand() % 5 - 2, rand() % 5 - 2), lifetime(1.0f) {
+        shape.setRadius(3);
+        shape.setFillColor(color);
+        shape.setPosition(position);
+    }
+
+    void update(float deltaTime) {
+        position += velocity;
+        lifetime -= deltaTime;
+        shape.setPosition(position);
+    }
+
+    void draw(sf::RenderWindow& window) const {
+        if (lifetime > 0) {
+            window.draw(shape);
+        }
+    }
+
+    bool isAlive() const {
+        return lifetime > 0;
+    }
+
+private:
+    sf::Vector2f position;
+    sf::Vector2f velocity;
+    float lifetime;
+    sf::CircleShape shape;
+};
+
+// Vector para almacenar partículas
+std::vector<Particula> particulas;
+
+// Función para generar partículas
+void generarParticulas(sf::Vector2f pos, sf::Color color) {
+    for (int i = 0; i < 10; ++i) {
+        particulas.emplace_back(pos, color);
+    }
+}
+
 // Función para dibujar barra de vida
 void dibujarBarra(sf::RenderWindow& window, int vida, sf::Vector2f pos, sf::Color color) {
     sf::RectangleShape fondo(sf::Vector2f(200, 20));
@@ -81,6 +170,20 @@ void dibujarBarra(sf::RenderWindow& window, int vida, sf::Vector2f pos, sf::Colo
     fondo.setPosition(pos);
 
     sf::RectangleShape barra(sf::Vector2f(2 * vida, 20));  // Vida de 0-100 -> barra de 0-200
+    barra.setFillColor(color);
+    barra.setPosition(pos);
+
+    window.draw(fondo);
+    window.draw(barra);
+}
+
+// Agregar una barra de energía para los ataques especiales
+void dibujarBarraEnergia(sf::RenderWindow& window, int energia, sf::Vector2f pos, sf::Color color) {
+    sf::RectangleShape fondo(sf::Vector2f(200, 10));
+    fondo.setFillColor(sf::Color(50, 50, 50));
+    fondo.setPosition(pos);
+
+    sf::RectangleShape barra(sf::Vector2f(2 * energia, 10)); // Energía de 0-100 -> barra de 0-200
     barra.setFillColor(color);
     barra.setPosition(pos);
 
@@ -123,7 +226,7 @@ int main() {
 
     sf::Sprite sprite1(texture1), sprite2(texture2);
     sprite1.setPosition(200, 200);
-    sprite2.setPosition(400, 200);
+    sprite2.setPosition(600, 200);
     sprite1.setScale(0.5f, 0.5f);
     sprite2.setScale(0.5f, 0.5f);
 
@@ -140,7 +243,7 @@ int main() {
 
     sf::Sprite ninjaSprite(ninjaTexture), samuraiSprite(samuraiTexture);
     ninjaSprite.setPosition(200, 200);
-    samuraiSprite.setPosition(400, 200);
+    samuraiSprite.setPosition(600, 200);
     ninjaSprite.setScale(0.5f, 0.5f);
     samuraiSprite.setScale(0.5f, 0.5f);
 
@@ -179,7 +282,7 @@ int main() {
             window.draw(samuraiSprite); // Mostrar samurai si no se ha seleccionado
         } else {
             sf::Text label2("Jugador 2 listo", font, 18);
-            label2.setPosition(400, 350);
+            label2.setPosition(600, 350);
             label2.setFillColor(sf::Color::Green);
             window.draw(label2);
         }
@@ -213,10 +316,10 @@ iniciarJuego:
     // Configurar peleadores con las imágenes originales para el combate
     Peleador p1(
         texture1,
-        {100, 400}, sf::Color::Red);
+        {200, 400}, sf::Color::Red); // Posición ajustada para el jugador 1
     Peleador p2(
         texture2,
-        {600, 400}, sf::Color::Blue);
+        {600, 400}, sf::Color::Blue); // Posición ajustada para el jugador 2
 
     // Mover las texturas a variables globales o de mayor alcance
     sf::Texture textureP1, textureP2;
@@ -249,7 +352,7 @@ iniciarJuego:
 
     // Modificar la función de reinicio para reutilizar las texturas
     auto reiniciarRonda = [&]() {
-        p1 = Peleador(textureP1, {100, 400}, sf::Color::Red);
+        p1 = Peleador(textureP1, {200, 400}, sf::Color::Red);
         p2 = Peleador(textureP2, {600, 400}, sf::Color::Blue);
         rondaActual++;
     };
@@ -289,6 +392,9 @@ iniciarJuego:
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) { // Defensa del jugador 1
                         p1.animate(tiempoAnimacion);
                         accionRealizada = true;
+                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) { // Ataque especial del jugador 1
+                        p1.usarEspecial(p2, 1);
+                        accionRealizada = true;
                     }
                 } else {
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) { // Ataque del jugador 2
@@ -297,6 +403,9 @@ iniciarJuego:
                         accionRealizada = true;
                     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) { // Defensa del jugador 2
                         p2.animate(tiempoAnimacion);
+                        accionRealizada = true;
+                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) { // Ataque especial del jugador 2
+                        p2.usarEspecial(p1, 2);
                         accionRealizada = true;
                     }
                 }
@@ -377,6 +486,35 @@ iniciarJuego:
         dibujarBarra(window, p1.getVida(), {50, 550}, sf::Color::Red);
         dibujarBarra(window, p2.getVida(), {550, 550}, sf::Color::Blue);
 
+        // Asegurarse de que la energía del jugador 2 también se actualice correctamente
+        auto actualizarEnergia = [&]() {
+            p1.cargarEnergia();
+            p2.cargarEnergia();
+        };
+
+        // En el bucle principal, llamar a la función para actualizar la energía
+        actualizarEnergia();
+
+        // Dibujar barras de energía para ambos jugadores
+        dibujarBarraEnergia(window, p1.getEnergia(), {50, 530}, sf::Color::Yellow);
+        dibujarBarraEnergia(window, p2.getEnergia(), {550, 530}, sf::Color::Yellow);
+
+        // Revisar y ajustar la lógica de los ataques especiales para evitar bloqueos
+        if (turnoJugador1) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3) && p1.puedeUsarEspecial()) { // Ataque especial del jugador 1
+                p1.usarEspecial(p2, 1);
+                accionRealizada = true;
+            }
+        } else {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3) && p2.puedeUsarEspecial()) { // Ataque especial del jugador 2
+                p2.usarEspecial(p1, 2);
+                accionRealizada = true;
+            }
+        }
+
+        // Asegurar que la energía se actualice correctamente en cada frame
+        actualizarEnergia();
+
         // Indicador de turno
         sf::Text turnoText;
         turnoText.setFont(font);
@@ -397,6 +535,20 @@ iniciarJuego:
 
         // Dibujar texto de la ronda
         window.draw(rondaText);
+
+        // Actualizar y dibujar partículas
+        for (auto it = particulas.begin(); it != particulas.end();) {
+            it->update(deltaTime);
+            if (!it->isAlive()) {
+                it = particulas.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        for (const auto& particula : particulas) {
+            particula.draw(window);
+        }
 
         window.display();
     }
