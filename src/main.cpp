@@ -227,8 +227,8 @@ int main() {
     sf::Sprite sprite1(texture1), sprite2(texture2);
     sprite1.setPosition(200, 200);
     sprite2.setPosition(600, 200);
-    sprite1.setScale(0.5f, 0.5f);
-    sprite2.setScale(0.5f, 0.5f);
+    sprite1.setScale(3.0f, 3.0f); // Escalar el personaje 1
+    sprite2.setScale(3.0f, 3.0f); // Escalar el personaje 2
 
     int seleccionJugador1 = 0;
     int seleccionJugador2 = 0;
@@ -244,19 +244,31 @@ int main() {
     sf::Sprite ninjaSprite(ninjaTexture), samuraiSprite(samuraiTexture);
     ninjaSprite.setPosition(200, 200);
     samuraiSprite.setPosition(600, 200);
-    ninjaSprite.setScale(0.5f, 0.5f);
-    samuraiSprite.setScale(0.5f, 0.5f);
+    ninjaSprite.setScale(3.0, 3.0f); // Escalar el ninja
+    samuraiSprite.setScale(3.0f, 3.0f); // Escalar el samurai
 
     // Ajustar tamaño y posición de las imágenes del menú
-    ninjaSprite.setScale(0.7f, 0.7f); // Hacer la imagen de Ninja más grande
-    samuraiSprite.setScale(0.7f, 0.7f); // Hacer la imagen de Samurai más grande
+    ninjaSprite.setScale(1.0f, 1.0f); // Hacer la imagen de Ninja más grande
+    samuraiSprite.setScale(1.0f, 1.0f); // Hacer la imagen de Samurai más grande
 
     ninjaSprite.setPosition((800 / 4) - (ninjaSprite.getGlobalBounds().width / 2), 250); // Bajar Ninja
     samuraiSprite.setPosition((800 * 3 / 4) - (samuraiSprite.getGlobalBounds().width / 2), 250); // Bajar Samurai
 
-    // Ajustar el menú para mostrar ninja y samurai
+    // Cargar la imagen de fondo para la presentación
+    sf::Texture fondoPresentacion;
+    if (!fondoPresentacion.loadFromFile("./assets/images/FONDO.jpg")) {
+        std::cerr << "Error cargando la textura de fondo de presentación\n";
+        return -1;
+    }
+
+    sf::Sprite fondoSpritePresentacion(fondoPresentacion);
+
+    // Mostrar la pantalla de presentación con los personajes
     while (true) {
         window.clear();
+
+        // Dibujar el fondo de presentación
+        window.draw(fondoSpritePresentacion);
 
         // Mostrar el título "Ninja vs Samurai" centrado en la pantalla
         sf::Text titleText("Ninja vs Samurai", font, 30); // Título con tamaño de fuente 30
@@ -328,6 +340,15 @@ iniciarJuego:
         std::cerr << "Error cargando texturas de los peleadores\n";
         return -1;
     }
+
+    // Cargar la imagen de fondo para las peleas
+    sf::Texture fondoPelea;
+    if (!fondoPelea.loadFromFile("./assets/images/FONDO 1.jpg")) {
+        std::cerr << "Error cargando la textura de fondo de pelea\n";
+        return -1;
+    }
+
+    sf::Sprite fondoSpritePelea(fondoPelea);
 
     // Actualizar teclas de ataque y defensa
     const float speed = 3.0f;
@@ -475,12 +496,15 @@ iniciarJuego:
         // Dibujo
         window.clear();
 
+        // Dibujar el fondo de pelea
+        window.draw(fondoSpritePelea);
+
         // Dibujar el texto del título y el menú
         window.draw(text);
 
         // Dibujar los sprites de los jugadores
-        p1.draw(window); // Dibujar solo el sprite del jugador 1
-        p2.draw(window); // Dibujar solo el sprite del jugador 2
+        p1.draw(window);
+        p2.draw(window);
 
         // Dibujar barras de vida
         dibujarBarra(window, p1.getVida(), {50, 550}, sf::Color::Red);
@@ -503,12 +527,22 @@ iniciarJuego:
         if (turnoJugador1) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3) && p1.puedeUsarEspecial()) { // Ataque especial del jugador 1
                 p1.usarEspecial(p2, 1);
-                accionRealizada = true;
+                turnoJugador1 = false; // Cambiar turno inmediatamente
+            } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) { // Ataque normal del jugador 1
+                p2.recibirDanio(5);
+                turnoJugador1 = false;
+            } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) { // Defensa del jugador 1
+                turnoJugador1 = false;
             }
         } else {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3) && p2.puedeUsarEspecial()) { // Ataque especial del jugador 2
                 p2.usarEspecial(p1, 2);
-                accionRealizada = true;
+                turnoJugador1 = true; // Cambiar turno inmediatamente
+            } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) { // Ataque normal del jugador 2
+                p1.recibirDanio(5);
+                turnoJugador1 = true;
+            } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) { // Defensa del jugador 2
+                turnoJugador1 = true;
             }
         }
 
