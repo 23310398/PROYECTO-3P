@@ -17,6 +17,7 @@ proyecto_juego_pelea/
 ├── assets/
 │   ├── images/
 │   │   └── personaje.png
+|   |   └── Fondo.png
 │   ├── music/
 │   │   └── musica.ogg
 │   └── fonts/
@@ -37,7 +38,10 @@ Esto compilará y ejecutará el juego. Asegúrate de que las rutas a los archivo
 
 ## Controles
 
-- Flechas del teclado: Mover el personaje.
+- Flechas del teclado: decicion del jugador en su turno
+- 1: ataque
+- 2: defensa
+- 3: especial
 
 ## Notas
 
