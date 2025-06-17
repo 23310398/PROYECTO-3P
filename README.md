@@ -38,10 +38,7 @@ Esto compilará y ejecutará el juego. Asegúrate de que las rutas a los archivo
 
 ## Controles
 
-- Flechas del teclado: decicion del jugador en su turno
-- 1: ataque
-- 2: defensa
-- 3: especial
+- Flechas del teclado: movimiento del jugador
 
 ## Notas
 
