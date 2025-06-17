@@ -10,18 +10,23 @@ void generarParticulas(sf::Vector2f pos, sf::Color color);
 class Peleador {
 public:
     // Modificar la clase Peleador para aceptar texturas pre-cargadas
-    Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor)
+    Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor, bool voltear = false)
         : vida(100), energia(0), currentFrame(0), animationTime(0.1f), elapsedTime(0.0f) {
-        texture = &sharedTexture; // Usar la textura compartida
+        texture = &sharedTexture;
+        frameWidth = 40; // Ancho de cada frame
+        frameHeight = 29; // Alto de cada frame
         sprite.setTexture(*texture);
-        sprite.setPosition(startPos);
-        sprite.setScale(1.0f, 1.0f);
-
-        // Configurar el rectángulo inicial del sprite
-        frameWidth = 64; // Ancho de cada frame
-        frameHeight = 64; // Alto de cada frame
         sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
-
+        sprite.setColor(sf::Color::White); // Siempre iniciar sin filtro
+        if (voltear) {
+            sprite.setScale(-4.0f, 4.0f);
+            sprite.setOrigin(frameWidth, 0); // Origen al borde derecho
+            sprite.setPosition(startPos.x + frameWidth, startPos.y); // Ajustar posición inicial
+        } else {
+            sprite.setScale(4.0f, 4.0f);
+            sprite.setOrigin(0, 0);
+            sprite.setPosition(startPos);
+        }
         hitbox.setSize(sf::Vector2f(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height));
         hitbox.setFillColor(sf::Color::Transparent);
         hitbox.setOutlineColor(boxColor);
@@ -218,8 +223,8 @@ int main() {
 
     // Menú para seleccionar personajes con imágenes y letras debajo
     sf::Texture texture1, texture2;
-    if (!texture1.loadFromFile("./assets/images/peleador1.png") ||
-        !texture2.loadFromFile("./assets/images/peleador2.png")) {
+    if (!texture1.loadFromFile("./assets/images/peleador1,2.png") ||
+        !texture2.loadFromFile("./assets/images/peleador2,2.png")) {
         std::cerr << "Error cargando texturas para el menú\n";
         return -1;
     }
@@ -262,6 +267,11 @@ int main() {
     }
 
     sf::Sprite fondoSpritePresentacion(fondoPresentacion);
+    // Ajustar fondo de presentación
+    fondoSpritePresentacion.setScale(
+        800.0f / fondoPresentacion.getSize().x,
+        600.0f / fondoPresentacion.getSize().y
+    );
 
     // Mostrar la pantalla de presentación con los personajes
     while (true) {
@@ -328,15 +338,15 @@ iniciarJuego:
     // Configurar peleadores con las imágenes originales para el combate
     Peleador p1(
         texture1,
-        {200, 400}, sf::Color::Red); // Posición ajustada para el jugador 1
+        {200, 400}, sf::Color::Red, false); // Jugador 1 no volteado
     Peleador p2(
         texture2,
-        {600, 400}, sf::Color::Blue); // Posición ajustada para el jugador 2
+        {600, 400}, sf::Color::Blue, true); // Jugador 2 volteado
 
     // Mover las texturas a variables globales o de mayor alcance
     sf::Texture textureP1, textureP2;
-    if (!textureP1.loadFromFile("./assets/images/peleador1.png") ||
-        !textureP2.loadFromFile("./assets/images/peleador2.png")) {
+    if (!textureP1.loadFromFile("./assets/images/peleador1,2.png") ||
+        !textureP2.loadFromFile("./assets/images/peleador2,2.png")) {
         std::cerr << "Error cargando texturas de los peleadores\n";
         return -1;
     }
@@ -349,6 +359,11 @@ iniciarJuego:
     }
 
     sf::Sprite fondoSpritePelea(fondoPelea);
+    // Ajustar fondo de pelea
+    fondoSpritePelea.setScale(
+        800.0f / fondoPelea.getSize().x,
+        600.0f / fondoPelea.getSize().y
+    );
 
     // Actualizar teclas de ataque y defensa
     const float speed = 3.0f;
@@ -373,8 +388,8 @@ iniciarJuego:
 
     // Modificar la función de reinicio para reutilizar las texturas
     auto reiniciarRonda = [&]() {
-        p1 = Peleador(textureP1, {200, 400}, sf::Color::Red);
-        p2 = Peleador(textureP2, {600, 400}, sf::Color::Blue);
+        p1 = Peleador(textureP1, {200, 400}, sf::Color::Red, false);
+        p2 = Peleador(textureP2, {600, 400}, sf::Color::Blue, true);
         rondaActual++;
     };
 
@@ -386,99 +401,170 @@ iniciarJuego:
     marcadorText.setPosition(300, 50); // Posición centrada en la parte superior
 
     sf::Clock clock; // Reloj para calcular deltaTime
+    bool gameOver = false;
+    int ganador = 0; // 1 para jugador 1, 2 para jugador 2, 0 para empate
+
+    // Cargar la imagen de fondo para la pantalla de Game Over
+    sf::Texture fondoGameOver;
+    if (!fondoGameOver.loadFromFile("./assets/images/FONDO3.jpg")) {
+        std::cerr << "No se pudo cargar la imagen de fondo de Game Over\n";
+    }
+    sf::Sprite spriteFondoGameOver(fondoGameOver);
+    spriteFondoGameOver.setScale(
+        800.0f / fondoGameOver.getSize().x,
+        600.0f / fondoGameOver.getSize().y
+    );
+
     while (window.isOpen()) {
-        float deltaTime = clock.restart().asSeconds(); // Reiniciar el reloj y obtener el tiempo transcurrido
+        float deltaTime = clock.restart().asSeconds();
 
         sf::Event ev;
         while (window.pollEvent(ev)) {
             if (ev.type == sf::Event::Closed)
                 window.close();
         }
+        // --- Pantalla de Game Over ---
+        if (gameOver) {
+            window.clear();
+            window.draw(spriteFondoGameOver); // Dibuja el fondo ajustado
+            sf::Text gameOverText;
+            gameOverText.setFont(font);
+            gameOverText.setCharacterSize(40);
+            gameOverText.setFillColor(sf::Color::Red);
+            gameOverText.setString("GAME OVER");
+            gameOverText.setPosition((800 - gameOverText.getGlobalBounds().width) / 2, 100);
+            window.draw(gameOverText);
+            sf::Text winnerText;
+            winnerText.setFont(font);
+            winnerText.setCharacterSize(30);
+            winnerText.setFillColor(sf::Color::White);
+            if (ganador == 1) {
+                winnerText.setString("¡Jugador 1 gana!");
+            } else if (ganador == 2) {
+                winnerText.setString("¡Jugador 2 gana!");
+            } else {
+                winnerText.setString("¡Empate!");
+            }
+            winnerText.setPosition((800 - winnerText.getGlobalBounds().width) / 2, 200);
+            window.draw(winnerText);
+            // Mostrar sprite del ganador
+            if (ganador == 1) {
+                p1.draw(window);
+            } else if (ganador == 2) {
+                p2.draw(window);
+            }
+            // Mensaje para volver a jugar
+            sf::Text restartText;
+            restartText.setFont(font);
+            restartText.setCharacterSize(24);
+            restartText.setFillColor(sf::Color::Yellow);
+            restartText.setString("Presiona R para volver a jugar o ESC para salir");
+            restartText.setPosition((800 - restartText.getGlobalBounds().width) / 2, 350);
+            window.draw(restartText);
+            window.display();
+            // Esperar acción del usuario
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+                // Reiniciar variables
+                victoriasJugador1 = 0;
+                victoriasJugador2 = 0;
+                rondaActual = 1;
+                reiniciarRonda();
+                gameOver = false;
+                ganador = 0;
+            } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+                window.close();
+            }
+            continue;
+        }
 
         // Control de turnos con movimiento al atacar o defender
-        if (!accionRealizada) {
-            // Ajustar el daño infligido por ataque para que sea menor
-            const int danioPorAtaque = 5; // Reducir el daño a 5
-
-            // Hacer las animaciones más lentas
-            const float tiempoAnimacion = 0.2f; // Aumentar el tiempo entre frames
-
-            // Cambiar turno automáticamente incluso si el jugador elige defender
-            if (!accionRealizada) {
-                if (turnoJugador1) {
-                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) { // Ataque del jugador 1
-                        p2.recibirDanio(danioPorAtaque);
-                        p1.animate(tiempoAnimacion);
-                        accionRealizada = true;
-                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) { // Defensa del jugador 1
-                        p1.animate(tiempoAnimacion);
-                        accionRealizada = true;
-                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) { // Ataque especial del jugador 1
-                        p1.usarEspecial(p2, 1);
-                        accionRealizada = true;
-                    }
-                } else {
-                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) { // Ataque del jugador 2
-                        p1.recibirDanio(danioPorAtaque);
-                        p2.animate(tiempoAnimacion);
-                        accionRealizada = true;
-                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) { // Defensa del jugador 2
-                        p2.animate(tiempoAnimacion);
-                        accionRealizada = true;
-                    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) { // Ataque especial del jugador 2
-                        p2.usarEspecial(p1, 2);
-                        accionRealizada = true;
-                    }
+        // --- Control de turnos robusto: SOLO este bloque debe cambiar turnoJugador1 ---
+        static bool teclasSoltadas = true;
+        if (teclasSoltadas) {
+            const int danioPorAtaque = 5;
+            const float tiempoAnimacion = 0.2f;
+            bool accion = false;
+            if (turnoJugador1) {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
+                    p2.recibirDanio(danioPorAtaque);
+                    p1.animate(tiempoAnimacion);
+                    turnoJugador1 = false;
+                    accion = true;
+                } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) {
+                    p1.animate(tiempoAnimacion);
+                    turnoJugador1 = false;
+                    accion = true;
+                } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) {
+                    p1.usarEspecial(p2, 1);
+                    turnoJugador1 = false;
+                    accion = true;
                 }
-
-                // Cambiar turno automáticamente después de cualquier acción
-                if (accionRealizada) {
-                    turnoJugador1 = !turnoJugador1;
-                    accionRealizada = false;
+            } else {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
+                    p1.recibirDanio(danioPorAtaque);
+                    p2.animate(tiempoAnimacion);
+                    turnoJugador1 = true;
+                    accion = true;
+                } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) {
+                    p2.animate(tiempoAnimacion);
+                    turnoJugador1 = true;
+                    accion = true;
+                } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) {
+                    p2.usarEspecial(p1, 2);
+                    turnoJugador1 = true;
+                    accion = true;
                 }
             }
+            if (accion) teclasSoltadas = false;
         }
+        // Solo permitir nueva acción cuando todas las teclas estén soltadas
+        if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Num1) &&
+            !sf::Keyboard::isKeyPressed(sf::Keyboard::Num2) &&
+            !sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) {
+            teclasSoltadas = true;
+        }
+        // --- Fin control de turnos robusto ---
 
         // Verificar si algún jugador se quedó sin vida
         if (p1.getVida() <= 0 || p2.getVida() <= 0) {
             if (p1.getVida() > p2.getVida()) {
                 victoriasJugador1++;
                 std::cout << "¡Jugador 1 gana la ronda!\n";
+                ganador = 1;
             } else if (p2.getVida() > p1.getVida()) {
                 victoriasJugador2++;
                 std::cout << "¡Jugador 2 gana la ronda!\n";
+                ganador = 2;
             } else {
                 std::cout << "¡Es un empate!\n";
+                ganador = 0;
             }
+            gameOver = (victoriasJugador1 == 3 || victoriasJugador2 == 3); // Verificar si hay un ganador final
             reiniciarRonda();
         }
 
         // Verificar si algún jugador ha ganado 3 rondas
         if (victoriasJugador1 == 3 || victoriasJugador2 == 3) {
             if (victoriasJugador1 == 3) {
-                std::cout << "¡Jugador 1 es el ganador final!\n";
+                ganador = 1;
+            } else if (victoriasJugador2 == 3) {
+                ganador = 2;
             } else {
-                std::cout << "¡Jugador 2 es el ganador final!\n";
+                ganador = 0;
             }
-            window.close();
-        }
-
-        // Finalizar el juego al presionar Shift
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
-            std::cout << "El juego ha sido finalizado manualmente.\n";
-            window.close();
+            gameOver = true;
         }
 
         // Finalizar el juego después de 3 rondas
         if (rondaActual > 3) {
             if (victoriasJugador1 > victoriasJugador2) {
-                std::cout << "¡Jugador 1 es el ganador final con " << victoriasJugador1 << " victorias!\n";
+                ganador = 1;
             } else if (victoriasJugador2 > victoriasJugador1) {
-                std::cout << "¡Jugador 2 es el ganador final con " << victoriasJugador2 << " victorias!\n";
+                ganador = 2;
             } else {
-                std::cout << "¡Es un empate! Ambos jugadores tienen " << victoriasJugador1 << " victorias.\n";
+                ganador = 0;
             }
-            window.close();
+            gameOver = true;
         }
 
         // Actualizar marcador
@@ -548,6 +634,17 @@ iniciarJuego:
 
         // Asegurar que la energía se actualice correctamente en cada frame
         actualizarEnergia();
+
+        // Mensaje de depuración para ver el cambio de turno
+        static bool lastTurnoJugador1 = turnoJugador1;
+        if (lastTurnoJugador1 != turnoJugador1) {
+            if (turnoJugador1) {
+                std::cout << "[DEBUG] Turno cambiado: Jugador 1\n";
+            } else {
+                std::cout << "[DEBUG] Turno cambiado: Jugador 2\n";
+            }
+            lastTurnoJugador1 = turnoJugador1;
+        }
 
         // Indicador de turno
         sf::Text turnoText;
