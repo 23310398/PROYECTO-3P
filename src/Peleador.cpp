@@ -95,3 +95,5 @@ int Peleador::getVida() const {
 int Peleador::getEnergia() const {
     return energia;
 }
+
+//fin de codigo

@@ -24,3 +24,4 @@ void Particula::draw(sf::RenderWindow& window) const {
 bool Particula::isAlive() const {
     return lifetime > 0;
 }
+//fin de codigo
