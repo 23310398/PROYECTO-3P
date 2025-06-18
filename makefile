@@ -1,8 +1,9 @@
 run: build
 	./game
 
+
 build:
-	g++ src/main.cpp -o game -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+	g++ src/main.cpp src/Peleador.cpp src/Particula.cpp -o game.exe -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 clean:
-	rm -f game
+	del /f game.exe
