@@ -4,6 +4,9 @@
 #include <vector>
 #include <cmath>
 
+using namespace std;
+using namespace sf;
+
 // Declarar generarParticulas antes de la clase Peleador
 void generarParticulas(sf::Vector2f pos, sf::Color color);
 
@@ -159,7 +162,7 @@ private:
 };
 
 // Vector para almacenar partículas
-std::vector<Particula> particulas;
+vector<Particula> particulas;
 
 // Función para generar partículas
 void generarParticulas(sf::Vector2f pos, sf::Color color) {
@@ -341,7 +344,7 @@ iniciarJuego:
         {200, 400}, sf::Color::Red, false); // Jugador 1 no volteado
     Peleador p2(
         texture2,
-        {600, 400}, sf::Color::Blue, true); // Jugador 2 volteado
+        {400, 400}, sf::Color::Blue, true); // Jugador 2 volteado
 
     // Mover las texturas a variables globales o de mayor alcance
     sf::Texture textureP1, textureP2;
@@ -387,10 +390,10 @@ iniciarJuego:
     rondaText.setPosition((800 - rondaText.getGlobalBounds().width) / 2, (600 - rondaText.getGlobalBounds().height) / 4 + 50); // Alinear con el marcador y otros textos
 
     // Modificar la función de reinicio para reutilizar las texturas
-    auto reiniciarRonda = [&]() {
+    auto reiniciarRonda = [&](bool soloRonda = true) {
         p1 = Peleador(textureP1, {200, 400}, sf::Color::Red, false);
-        p2 = Peleador(textureP2, {600, 400}, sf::Color::Blue, true);
-        rondaActual++;
+        p2 = Peleador(textureP2, {400, 400}, sf::Color::Blue, true);
+        if (soloRonda) rondaActual++;
     };
 
     // Mostrar marcador
@@ -468,7 +471,7 @@ iniciarJuego:
                 victoriasJugador1 = 0;
                 victoriasJugador2 = 0;
                 rondaActual = 1;
-                reiniciarRonda();
+                reiniciarRonda(false); // Reinicio total, NO suma ronda
                 gameOver = false;
                 ganador = 0;
             } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
@@ -540,7 +543,7 @@ iniciarJuego:
                 ganador = 0;
             }
             gameOver = (victoriasJugador1 == 3 || victoriasJugador2 == 3); // Verificar si hay un ganador final
-            reiniciarRonda();
+            reiniciarRonda(); // Solo cambio de ronda, suma 1
         }
 
         // Verificar si algún jugador ha ganado 3 rondas
@@ -634,17 +637,6 @@ iniciarJuego:
 
         // Asegurar que la energía se actualice correctamente en cada frame
         actualizarEnergia();
-
-        // Mensaje de depuración para ver el cambio de turno
-        static bool lastTurnoJugador1 = turnoJugador1;
-        if (lastTurnoJugador1 != turnoJugador1) {
-            if (turnoJugador1) {
-                std::cout << "[DEBUG] Turno cambiado: Jugador 1\n";
-            } else {
-                std::cout << "[DEBUG] Turno cambiado: Jugador 2\n";
-            }
-            lastTurnoJugador1 = turnoJugador1;
-        }
 
         // Indicador de turno
         sf::Text turnoText;

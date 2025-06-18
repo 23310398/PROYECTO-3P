@@ -1,6 +1,7 @@
 
 #include <SFML/Graphics.hpp>
-
+using namespace std;
+using namespace sf;
 class Peleador {
 public:
     Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor);
