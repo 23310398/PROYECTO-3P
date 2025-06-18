@@ -1,6 +1,6 @@
 @startuml
 
- Juego de Pelea SFML
+class JuegodePeleaSFML
 
 class Peleador {
     - sf::Texture* texture
@@ -36,9 +36,11 @@ class Barras {
     + dibujarBarra(window: sf::RenderWindow&, vida: int, pos: sf::Vector2f, color: sf::Color)
     + dibujarBarraEnergia(window: sf::RenderWindow&, energia: int, pos: sf::Vector2f, color: sf::Color)
 }
+Particula --* JuegodePeleaSFML
+Peleador "2" --* JuegodePeleaSFML
 
-Peleador "1" -- "*" Particula : "Genera"
-Peleador "1" -- "1" Barras : "Usa"
-Particula "*" -- "1" Barras : "Interactúa"
+Particula "*" --o "1" Peleador : "Genera"
+Barras "1" --o "1" Peleador : "Usa"
+Particula "*" --o "1" Barras : "Interactúa"
 
 @enduml
