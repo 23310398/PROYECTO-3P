@@ -21,9 +21,20 @@ public:
         sprite.setTexture(*texture);
         sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
         sprite.setColor(sf::Color::White); // Siempre iniciar sin filtro
-        // Ajustar nombres a camelCase
-        startPosition = startPos;
-        boxColor = boxColor;
+        if (voltear) {
+            sprite.setScale(-4.0f, 4.0f);
+            sprite.setOrigin(frameWidth, 0); // Origen al borde derecho
+            sprite.setPosition(startPos.x + frameWidth, startPos.y); // Ajustar posición inicial
+        } else {
+            sprite.setScale(4.0f, 4.0f);
+            sprite.setOrigin(0, 0);
+            sprite.setPosition(startPos);
+        }
+        hitbox.setSize(sf::Vector2f(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height));
+        hitbox.setFillColor(sf::Color::Transparent);
+        hitbox.setOutlineColor(boxColor);
+        hitbox.setOutlineThickness(1);
+        hitbox.setPosition(sprite.getPosition());
     }
 
     void move(float dx, float dy) {
