@@ -2,8 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
-extern void generarParticulas(sf::Vector2f pos, sf::Color color);
-
 Peleador::Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor, bool voltear)
     : vida(100), energia(0), currentFrame(0), animationTime(0.1f), elapsedTime(0.0f) {
     texture = &sharedTexture;
@@ -54,7 +52,7 @@ void Peleador::recibirDanio(int cantidad) {
     vida -= cantidad;
     if (vida < 0) vida = 0;
     sprite.setColor(sf::Color::Red);
-    generarParticulas(sprite.getPosition(), sf::Color::Yellow); // Llama desde main
+    // La generación de partículas ahora la maneja la clase Juego
 }
 
 void Peleador::cargarEnergia() {

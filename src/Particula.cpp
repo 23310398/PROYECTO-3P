@@ -1,5 +1,4 @@
 #include "../include/Particula.hpp"
-#include <SFML/Graphics.hpp>
 #include <cstdlib>
 
 Particula::Particula(sf::Vector2f pos, sf::Color color)
@@ -15,13 +14,12 @@ void Particula::update(float deltaTime) {
     shape.setPosition(position);
 }
 
-void Particula::draw(sf::RenderWindow& window) const {
+void Particula::Draw(sf::RenderWindow& window) const {
     if (lifetime > 0) {
         window.draw(shape);
     }
 }
 
-bool Particula::isAlive() const {
+bool Particula::IsAlive() const {
     return lifetime > 0;
 }
-//fin de codigo

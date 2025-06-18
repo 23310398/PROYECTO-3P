@@ -1,0 +1,56 @@
+@startuml
+
+class Juego {
+    + run()
+    + mostrarPantallaPresentacion()
+    + iniciarRonda()
+    + mostrarGameOver()
+    + actualizar()
+    + dibujar()
+    + manejarEventos()
+    + generarParticulas(pos: sf::Vector2f, color: sf::Color)
+    + dibujarBarra(window: sf::RenderWindow&, vida: int, pos: sf::Vector2f, color: sf::Color)
+    + dibujarBarraEnergia(window: sf::RenderWindow&, energia: int, pos: sf::Vector2f, color: sf::Color)
+    + reiniciarRonda(soloRonda: bool)
+}
+
+class Peleador {
+    - texture: sf::Texture*
+    - sprite: sf::Sprite
+    - hitbox: sf::RectangleShape
+    - vida: int
+    - energia: int
+    - frameWidth: int
+    - frameHeight: int
+    - currentFrame: int
+    - animationTime: float
+    - elapsedTime: float
+    + Peleador(sharedTexture: sf::Texture&, startPos: sf::Vector2f, boxColor: sf::Color, voltear: bool)
+    + move(dx: float, dy: float)
+    + animate(deltaTime: float)
+    + draw(window: sf::RenderWindow&)
+    + getBounds(): sf::FloatRect
+    + recibirDanio(cantidad: int)
+    + cargarEnergia()
+    + puedeUsarEspecial(): bool
+    + usarEspecial(oponente: Peleador&, jugador: int)
+    + update(deltaTime: float)
+    + getVida(): int
+    + getEnergia(): int
+}
+
+class Particula {
+    - position: sf::Vector2f
+    - velocity: sf::Vector2f
+    - lifetime: float
+    - shape: sf::CircleShape
+    + Particula(pos: sf::Vector2f, color: sf::Color)
+    + update(deltaTime: float)
+    + Draw(window: sf::RenderWindow&) const
+    + IsAlive(): bool
+}
+
+Juego "1" *-- "2" Peleador
+Juego "1" *-- "*" Particula
+
+@enduml
