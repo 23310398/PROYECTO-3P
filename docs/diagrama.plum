@@ -1,6 +1,6 @@
 @startuml
 
-title Diagrama de Clases - Juego de Pelea SFML
+ Juego de Pelea SFML
 
 class Peleador {
     - sf::Texture* texture
