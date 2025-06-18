@@ -1,5 +1,6 @@
 @startuml
-title Diagrama de Clases - Juego de Pelea SFML
+
+ Juego de Pelea SFML
 
 class Peleador {
     - sf::Texture* texture
@@ -12,18 +13,12 @@ class Peleador {
     - int currentFrame
     - float animationTime
     - float elapsedTime
-    
+
     + Mover(dx: float, dy: float)
     + Animar(deltaTime: float)
     + Dibujar(window: sf::RenderWindow&)
     + ObtenerLimites(): sf::FloatRect
     + RecibirDanio(cantidad: int)
-    + CargarEnergia()
-    + PuedeUsarEspecial(): bool
-    + UsarEspecial(oponente: Peleador, jugador: int)
-    + Actualizar(deltaTime: float)
-    + ObtenerVida(): int
-    + ObtenerEnergia(): int
 }
 
 class Particula {
@@ -31,20 +26,19 @@ class Particula {
     - sf::Vector2f velocity
     - float lifetime
     - sf::CircleShape shape
-    
-    + Actualizar(deltaTime: float)
-    + Dibujar(window: sf::RenderWindow&) const
-    + EstaViva(): bool
+
+    + update(deltaTime: float)
+    + draw(window: sf::RenderWindow&)
+    + isAlive(): bool
 }
 
-class Utilidades {
-    + GenerarParticulas(pos: sf::Vector2f, color: sf::Color)
-    + DibujarBarra(window: sf::RenderWindow&, vida: int, pos: sf::Vector2f, color: sf::Color)
-    + DibujarBarraEnergia(window: sf::RenderWindow&, energia: int, pos: sf::Vector2f, color: sf::Color)
+class Barras {
+    + dibujarBarra(window: sf::RenderWindow&, vida: int, pos: sf::Vector2f, color: sf::Color)
+    + dibujarBarraEnergia(window: sf::RenderWindow&, energia: int, pos: sf::Vector2f, color: sf::Color)
 }
 
-Peleador "1" *-- "*" Particula 
-Utilidades ..> Peleador 
-Utilidades ..> Particula 
+Peleador "1" -- "*" Particula : "Genera"
+Peleador "1" -- "1" Barras : "Usa"
+Particula "*" -- "1" Barras : "Interactúa"
 
 @enduml
