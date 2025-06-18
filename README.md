@@ -47,7 +47,12 @@ Esto compilará y ejecutará el juego. Asegúrate de que las rutas a los archivo
 
 ## Créditos
 
-Este juego fue generado como base educativa para un proyecto de pelea en SFML.
+Las imágenes utilizadas en este proyecto fueron obtenidas de diversas fuentes en Internet. A continuación, se listan los créditos correspondientes:
 
----
-¡Disfruta programando y mejorando tu juego!
+- **FONDO 1.jpg, FONDO.jpg, FONDO2.jpg, FONDO3.jpg**: Fondos genéricos descargados de bancos de imágenes gratuitos.
+- **ninja.png, samurai.png**: Sprites de personajes obtenidos de recursos gratuitos para desarrolladores de videojuegos.
+- **peleador1.png, peleador1,2.png, peleador2.png, peleador2,2.png**: Diseños de personajes adaptados de imágenes de dominio público.
+
+
+
+
