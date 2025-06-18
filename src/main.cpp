@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include "../include/Peleador.hpp"
+#include "../include/Particula.hpp"
 
 using namespace std;
 using namespace sf;
@@ -10,159 +12,8 @@ using namespace sf;
 // Declarar generarParticulas antes de la clase Peleador
 void generarParticulas(sf::Vector2f pos, sf::Color color);
 
-class Peleador {
-public:
-    // Modificar la clase Peleador para aceptar texturas pre-cargadas
-    Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor, bool voltear = false)
-        : vida(100), energia(0), currentFrame(0), animationTime(0.1f), elapsedTime(0.0f) {
-        texture = &sharedTexture;
-        frameWidth = 40; // Ancho de cada frame
-        frameHeight = 29; // Alto de cada frame
-        sprite.setTexture(*texture);
-        sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
-        sprite.setColor(sf::Color::White); // Siempre iniciar sin filtro
-        if (voltear) {
-            sprite.setScale(-4.0f, 4.0f);
-            sprite.setOrigin(frameWidth, 0); // Origen al borde derecho
-            sprite.setPosition(startPos.x + frameWidth, startPos.y); // Ajustar posición inicial
-        } else {
-            sprite.setScale(4.0f, 4.0f);
-            sprite.setOrigin(0, 0);
-            sprite.setPosition(startPos);
-        }
-        hitbox.setSize(sf::Vector2f(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height));
-        hitbox.setFillColor(sf::Color::Transparent);
-        hitbox.setOutlineColor(boxColor);
-        hitbox.setOutlineThickness(1);
-        hitbox.setPosition(sprite.getPosition());
-    }
-
-    void move(float dx, float dy) {
-        sprite.move(dx, dy);
-        hitbox.move(dx, dy);
-    }
-
-    void animate(float deltaTime) {
-        // Actualizar el temporizador
-        elapsedTime += deltaTime;
-        if (elapsedTime >= animationTime) {
-            elapsedTime = 0.0f;
-            // Cambiar al siguiente frame del sprite sheet
-            currentFrame = (currentFrame + 1) % (texture->getSize().x / frameWidth);
-            sprite.setTextureRect(sf::IntRect(currentFrame * frameWidth, 0, frameWidth, frameHeight));
-        }
-    }
-
-    void draw(sf::RenderWindow& window) {
-        window.draw(sprite); // Dibujar solo el sprite del jugador
-        //window.draw(hitbox); // Descomenta para ver hitbox si es necesario
-    }
-
-    sf::FloatRect getBounds() const {
-        return hitbox.getGlobalBounds();
-    }
-
-    void recibirDanio(int cantidad) {
-        vida -= cantidad;
-        if (vida < 0) vida = 0;
-
-        // Cambiar temporalmente el color del sprite
-        sprite.setColor(sf::Color::Red);
-        generarParticulas(sprite.getPosition(), sf::Color::Yellow);
-    }
-
-    void cargarEnergia() {
-        if (energia < 100) {
-            energia += 1; // Incrementar energía gradualmente
-        }
-    }
-
-    bool puedeUsarEspecial() const {
-        return energia >= 100;
-    }
-
-    // Modificar usarEspecial para personalizar los ataques especiales
-    void usarEspecial(Peleador& oponente, int jugador) {
-        if (puedeUsarEspecial()) {
-            if (jugador == 1) {
-                oponente.recibirDanio(30); // Jugador 1 inflige 30 de daño
-                oponente.move(-50, 0); // Empuja al oponente hacia atrás
-            } else if (jugador == 2) {
-                oponente.recibirDanio(20); // Jugador 2 inflige 20 de daño
-                vida += 10; // Recupera 10 puntos de vida
-                if (vida > 100) vida = 100; // Limitar la vida máxima a 100
-            }
-            energia = 0; // Reiniciar energía después de usar el especial
-        }
-    }
-
-    void update(float deltaTime) {
-        if (sprite.getColor() == sf::Color::Red) {
-            sprite.setColor(sf::Color::White);
-        }
-        animate(deltaTime);
-    }
-
-    int getVida() const {
-        return vida;
-    }
-
-    int getEnergia() const {
-        return energia;
-    }
-
-private:
-    sf::Texture* texture; // Apuntar a la textura compartida
-    sf::Sprite sprite;
-    sf::RectangleShape hitbox;
-    int vida;
-    int energia;
-
-    // Variables para manejar el sprite sheet
-    int frameWidth;
-    int frameHeight;
-    int currentFrame;
-
-    // Variables para animaciones fluidas
-    float animationTime; // Tiempo entre frames
-    float elapsedTime;   // Tiempo transcurrido
-};
-
-// Clase para manejar partículas visuales
-class Particula {
-public:
-    Particula(sf::Vector2f pos, sf::Color color)
-        : position(pos), velocity(rand() % 5 - 2, rand() % 5 - 2), lifetime(1.0f) {
-        shape.setRadius(3);
-        shape.setFillColor(color);
-        shape.setPosition(position);
-    }
-
-    void update(float deltaTime) {
-        position += velocity;
-        lifetime -= deltaTime;
-        shape.setPosition(position);
-    }
-
-    void draw(sf::RenderWindow& window) const {
-        if (lifetime > 0) {
-            window.draw(shape);
-        }
-    }
-
-    bool isAlive() const {
-        return lifetime > 0;
-    }
-
-private:
-    sf::Vector2f position;
-    sf::Vector2f velocity;
-    float lifetime;
-    sf::CircleShape shape;
-};
-
-// Vector para almacenar partículas
-vector<Particula> particulas;
+// Declaración global de partículas
+std::vector<Particula> particulas;
 
 // Función para generar partículas
 void generarParticulas(sf::Vector2f pos, sf::Color color) {
@@ -176,25 +27,21 @@ void dibujarBarra(sf::RenderWindow& window, int vida, sf::Vector2f pos, sf::Colo
     sf::RectangleShape fondo(sf::Vector2f(200, 20));
     fondo.setFillColor(sf::Color(50, 50, 50));
     fondo.setPosition(pos);
-
-    sf::RectangleShape barra(sf::Vector2f(2 * vida, 20));  // Vida de 0-100 -> barra de 0-200
+    sf::RectangleShape barra(sf::Vector2f(2 * vida, 20));
     barra.setFillColor(color);
     barra.setPosition(pos);
-
     window.draw(fondo);
     window.draw(barra);
 }
 
-// Agregar una barra de energía para los ataques especiales
+// Función para dibujar barra de energía
 void dibujarBarraEnergia(sf::RenderWindow& window, int energia, sf::Vector2f pos, sf::Color color) {
     sf::RectangleShape fondo(sf::Vector2f(200, 10));
     fondo.setFillColor(sf::Color(50, 50, 50));
     fondo.setPosition(pos);
-
-    sf::RectangleShape barra(sf::Vector2f(2 * energia, 10)); // Energía de 0-100 -> barra de 0-200
+    sf::RectangleShape barra(sf::Vector2f(2 * energia, 10));
     barra.setFillColor(color);
     barra.setPosition(pos);
-
     window.draw(fondo);
     window.draw(barra);
 }
