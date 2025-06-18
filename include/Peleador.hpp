@@ -1,10 +1,10 @@
-
 #include <SFML/Graphics.hpp>
 using namespace std;
 using namespace sf;
 class Peleador {
 public:
     Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor);
+    Peleador(sf::Texture& sharedTexture, sf::Vector2f startPos, sf::Color boxColor, bool voltear); // Constructor de 4 argumentos
     void move(float dx, float dy);
     void animate(float deltaTime);
     void draw(sf::RenderWindow& window);
