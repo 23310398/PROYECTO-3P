@@ -15,4 +15,3 @@ int main() {
     juego.run();
     return 0;
 }
-// Fin del código

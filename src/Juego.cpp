@@ -10,18 +10,15 @@ Juego::Juego()
       p1(texture1, {200, 400}, sf::Color::Red, false),
       p2(texture2, {400, 400}, sf::Color::Blue, true) {
     window.setFramerateLimit(60);
-    // Cargar fuente
     if (!font.loadFromFile("./assets/fonts/Minecraft.ttf")) {
         std::cerr << "Error: No se pudo cargar la fuente desde ./assets/fonts/Minecraft.ttf\n";
     }
-    // Cargar música
     if (!music.openFromFile("./assets/music/musica.ogg")) {
         std::cerr << "Error cargando musica.ogg\n";
     } else {
         music.setLoop(true);
         music.play();
     }
-    // Cargar texturas
     texture1.loadFromFile("./assets/images/peleador1,2.png");
     texture2.loadFromFile("./assets/images/peleador2,2.png");
     ninjaTexture.loadFromFile("./assets/images/ninja.png");
@@ -37,8 +34,7 @@ Juego::Juego()
     fondoSpritePresentacion.setTexture(fondoPresentacion);
     fondoSpritePelea.setTexture(fondoPelea);
     spriteFondoGameOver.setTexture(fondoGameOver);
-    // Escalados y posiciones iniciales pueden ajustarse aquí
-}
+    }
 
 void Juego::run() {
     mostrarPantallaPresentacion();
@@ -50,9 +46,7 @@ void Juego::run() {
     }
 }
 
-// Métodos auxiliares (declaraciones vacías, implementarás la lógica después)
 void Juego::mostrarPantallaPresentacion() {
-    // Menú para seleccionar personajes con imágenes y letras debajo
     sprite1.setPosition(200, 200);
     sprite2.setPosition(600, 200);
     sprite1.setScale(3.0f, 3.0f);
@@ -119,7 +113,6 @@ void Juego::mostrarPantallaPresentacion() {
 }
 
 void Juego::iniciarRonda() {
-    // Inicializa los peleadores y variables de ronda
     p1 = Peleador(texture1, {200, 400}, sf::Color::Red, false);
     p2 = Peleador(texture2, {400, 400}, sf::Color::Blue, true);
     rondaActual = 1;
@@ -134,7 +127,6 @@ void Juego::iniciarRonda() {
 
 void Juego::mostrarGameOver() {
     window.clear();
-    // Escalar el fondo de Game Over a la ventana
     spriteFondoGameOver.setScale(
         800.0f / fondoGameOver.getSize().x,
         600.0f / fondoGameOver.getSize().y
@@ -160,7 +152,6 @@ void Juego::mostrarGameOver() {
     }
     winnerText.setPosition((800 - winnerText.getGlobalBounds().width) / 2, 200);
     window.draw(winnerText);
-    // Mostrar sprite del ganador
     if (ganador == 1) {
         p1.draw(window);
     } else if (ganador == 2) {
@@ -174,7 +165,6 @@ void Juego::mostrarGameOver() {
     restartText.setPosition((800 - restartText.getGlobalBounds().width) / 2, 350);
     window.draw(restartText);
     window.display();
-    // Esperar acción del usuario
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
         victoriasJugador1 = 0;
         victoriasJugador2 = 0;
@@ -189,7 +179,6 @@ void Juego::mostrarGameOver() {
 
 void Juego::actualizar() {
     float deltaTime = clock.restart().asSeconds();
-    // Control de turnos y acciones
     static bool teclasSoltadas = true;
     if (teclasSoltadas) {
         const int danioPorAtaque = 5;
@@ -237,10 +226,8 @@ void Juego::actualizar() {
         !sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) {
         teclasSoltadas = true;
     }
-    // Actualizar energía
     p1.cargarEnergia();
     p2.cargarEnergia();
-    // Actualizar partículas
     for (auto it = particulas.begin(); it != particulas.end();) {
         it->update(deltaTime);
         if (!it->IsAlive()) {
@@ -249,7 +236,6 @@ void Juego::actualizar() {
             ++it;
         }
     }
-    // Verificar fin de ronda o juego
     if (p1.getVida() <= 0 || p2.getVida() <= 0) {
         if (p1.getVida() > p2.getVida()) {
             victoriasJugador1++;
@@ -276,25 +262,20 @@ void Juego::actualizar() {
 }
 void Juego::dibujar() {
     window.clear();
-    // Escalar el fondo de pelea a la ventana
     fondoSpritePelea.setScale(
         800.0f / fondoPelea.getSize().x,
         600.0f / fondoPelea.getSize().y
     );
     window.draw(fondoSpritePelea);
-    // Peleadores
     p1.draw(window);
     p2.draw(window);
-    // Barras de vida y energía
     dibujarBarra(window, p1.getVida(), {50, 550}, sf::Color::Red);
     dibujarBarra(window, p2.getVida(), {550, 550}, sf::Color::Blue);
     dibujarBarraEnergia(window, p1.getEnergia(), {50, 530}, sf::Color::Yellow);
     dibujarBarraEnergia(window, p2.getEnergia(), {550, 530}, sf::Color::Yellow);
-    // Partículas
     for (const auto& particula : particulas) {
         particula.Draw(window);
     }
-    // Marcador y ronda
     marcadorText.setFont(font);
     marcadorText.setCharacterSize(20);
     marcadorText.setFillColor(sf::Color::White);
@@ -307,14 +288,12 @@ void Juego::dibujar() {
     rondaText.setString("Ronda: " + std::to_string(rondaActual));
     rondaText.setPosition((800 - rondaText.getGlobalBounds().width) / 2, 120);
     window.draw(rondaText);
-    // Turno
     turnoText.setFont(font);
     turnoText.setCharacterSize(20);
     turnoText.setFillColor(sf::Color::Yellow);
     turnoText.setPosition(300, 20);
     turnoText.setString(turnoJugador1 ? "Turno de Jugador 1" : "Turno de Jugador 2");
     window.draw(turnoText);
-    // Game Over
     if (gameOver) {
         mostrarGameOver();
         return;
@@ -327,8 +306,7 @@ void Juego::manejarEventos() {
     while (window.pollEvent(ev)) {
         if (ev.type == sf::Event::Closed)
             window.close();
-        // Aquí puedes agregar el manejo de teclas para el menú, reinicio, etc.
-    }
+        }
 }
 
 void Juego::generarParticulas(sf::Vector2f pos, sf::Color color) {

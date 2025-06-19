@@ -52,8 +52,7 @@ void Peleador::recibirDanio(int cantidad) {
     vida -= cantidad;
     if (vida < 0) vida = 0;
     sprite.setColor(sf::Color::Red);
-    // La generación de partículas ahora la maneja la clase Juego
-}
+    }
 
 void Peleador::cargarEnergia() {
     if (energia < 100) {
@@ -93,5 +92,3 @@ int Peleador::getVida() const {
 int Peleador::getEnergia() const {
     return energia;
 }
-
-//fin de codigo

@@ -11,7 +11,6 @@ public:
     void run();
 
 private:
-    // Métodos auxiliares
     void mostrarPantallaPresentacion();
     void iniciarRonda();
     void mostrarGameOver();
@@ -23,7 +22,6 @@ private:
     void dibujarBarraEnergia(sf::RenderWindow& window, int energia, sf::Vector2f pos, sf::Color color);
     void reiniciarRonda(bool soloRonda = true);
 
-    // Atributos
     sf::RenderWindow window;
     sf::Font font;
     sf::Music music;
