@@ -53,18 +53,24 @@ En la terminal MINGW64, dentro del directorio del proyecto, ejecuta:
 mingw32-make
 ./game.exe
 ```
+![imagen](assets/images/imagen.png)
 
 Esto compilará y ejecutará el juego. Asegúrate de que las rutas a los archivos de `assets/` estén correctas.
 
 ## Controles
 
 - Jugador 1 y Jugador 2: seleccionan personaje en el menú con teclas E y B.
+![imagen1](assets/images/imagen1.png)
 - Durante el combate:
     - `Num1`: Ataque
     - `Num2`: Defensa
     - `Num3`: Ataque especial (requiere energía)
+![imagen2](assets/images/imagen2.png)
+![imagen3](assets/images/imagen3.png)
     - `R`: Reiniciar en pantalla de Game Over
     - `ESC`: Salir
+![imagen4](assets/images/imagen4.png)
+
 
 ## Notas
 
