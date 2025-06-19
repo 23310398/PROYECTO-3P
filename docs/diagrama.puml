@@ -1,6 +1,17 @@
 @startuml
 
 class Juego {
+    - window: sf::RenderWindow
+    - font: sf::Font
+    - music: sf::Music
+    - texture1, texture2, ninjaTexture, samuraiTexture, fondoPresentacion, fondoPelea, fondoGameOver: sf::Texture
+    - sprite1, sprite2, ninjaSprite, samuraiSprite, fondoSpritePresentacion, fondoSpritePelea, spriteFondoGameOver: sf::Sprite
+    - p1, p2: Peleador
+    - particulas: std::vector<Particula>
+    - seleccionJugador1, seleccionJugador2, victoriasJugador1, victoriasJugador2, rondaActual, ganador: int
+    - turnoJugador1, accionRealizada, gameOver: bool
+    - text, rondaText, marcadorText, turnoText: sf::Text
+    - clock: sf::Clock
     + run()
     + mostrarPantallaPresentacion()
     + iniciarRonda()
