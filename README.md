@@ -54,7 +54,6 @@ mingw32-make
 ./game.exe
 ```
 ![Image](https://github.com/user-attachments/assets/fc925fd2-a810-416e-a514-1634f1ccc85b)
-![imagen](assets/images/imagen.png)
 
 Esto compilará y ejecutará el juego. Asegúrate de que las rutas a los archivos de `assets/` estén correctas.
 
@@ -62,19 +61,15 @@ Esto compilará y ejecutará el juego. Asegúrate de que las rutas a los archivo
 
 - Jugador 1 y Jugador 2: seleccionan personaje en el menú con teclas E y B.
 ![Image](https://github.com/user-attachments/assets/44b2f6e7-1b96-43e0-ace2-8238d12d724a)
-![imagen1](assets/images/imagen1.png)
 - Durante el combate:
     - `Num1`: Ataque
     - `Num2`: Defensa
     - `Num3`: Ataque especial (requiere energía)
 ![Image](https://github.com/user-attachments/assets/b84cfc18-c319-42ff-b5a5-525c207a3b86)
-![imagen2](assets/images/imagen2.png)
 ![Image](https://github.com/user-attachments/assets/585003a0-e445-4bbc-8192-483e533edc63)
-![imagen3](assets/images/imagen3.png)
     - `R`: Reiniciar en pantalla de Game Over
     - `ESC`: Salir
 ![Image](https://github.com/user-attachments/assets/2b44b954-1c2a-4b70-afda-e141801ab6e5)
-![imagen4](assets/images/imagen4.png)
 
 
 ## Notas
